@@ -1,9 +1,11 @@
 import axios from "axios";
 
 // Em dev, o Vite faz proxy de /api para http://localhost:3333 (ver vite.config.ts).
-// Em produção, troque para a URL real da API publicada.
+// Em produção, VITE_API_URL aponta direto para a API publicada (ex: Railway).
+const baseURL = import.meta.env.VITE_API_URL ?? "/api";
+
 export const api = axios.create({
-  baseURL: "/api",
+  baseURL,
 });
 
 // Injeta o token salvo em todas as requisições automaticamente.
