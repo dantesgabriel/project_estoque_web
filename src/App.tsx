@@ -8,6 +8,8 @@ import { MovementsPage } from "./pages/movements/MovementsPage";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 
+// ignora eu aqui pai
+
 export default function App() {
   return (
     <Routes>
