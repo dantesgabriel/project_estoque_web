@@ -8,8 +8,11 @@ const navItems = [
   { to: "/movimentacoes", label: "Movimentações" },
 ];
 
+const adminNavItems = [{ to: "/usuarios", label: "Usuários" }];
+
 export function AppLayout() {
   const { user, logout } = useAuth();
+  const items = user?.role === "ADMIN" ? [...navItems, ...adminNavItems] : navItems;
 
   return (
     <div className="min-h-screen flex bg-slate-50">
@@ -19,7 +22,7 @@ export function AppLayout() {
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map((item) => (
+          {items.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

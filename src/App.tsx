@@ -5,10 +5,10 @@ import { ProductsPage } from "./pages/products/ProductsPage";
 import { InventoryListPage } from "./pages/inventory/InventoryListPage";
 import { InventoryDetailPage } from "./pages/inventory/InventoryDetailPage";
 import { MovementsPage } from "./pages/movements/MovementsPage";
+import { UsersPage } from "./pages/users/UsersPage";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
-
-// ignora eu aqui pai
+import { AdminRoute } from "./routes/AdminRoute";
 
 export default function App() {
   return (
@@ -22,6 +22,10 @@ export default function App() {
           <Route path="/inventarios" element={<InventoryListPage />} />
           <Route path="/inventarios/:id" element={<InventoryDetailPage />} />
           <Route path="/movimentacoes" element={<MovementsPage />} />
+
+          <Route element={<AdminRoute />}>
+            <Route path="/usuarios" element={<UsersPage />} />
+          </Route>
         </Route>
       </Route>
 
