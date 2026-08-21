@@ -3,13 +3,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productsApi } from "../../api/products";
 import { categoriesApi } from "../../api/categories";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import { Modal } from "../../components/ui/Modal";
 import { StockBadge } from "../../components/ui/StockBadge";
+import { TableSkeleton } from "../../components/ui/TableSkeleton";
 import { ProductForm } from "./ProductForm";
 import type { Product, ProductFilters } from "../../types/product";
 
 export function ProductsPage() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const isAdmin = user?.role === "ADMIN";
 
@@ -33,6 +36,7 @@ export function ProductsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setIsModalOpen(false);
+      showToast("Produto criado com sucesso");
     },
   });
 
@@ -43,6 +47,7 @@ export function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setIsModalOpen(false);
       setEditingProduct(undefined);
+      showToast("Produto atualizado com sucesso");
     },
   });
 
@@ -135,13 +140,7 @@ export function ProductsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {isLoading && (
-              <tr>
-                <td colSpan={6} className="text-center py-8 text-slate-500">
-                  Carregando...
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={6} />}
 
             {!isLoading && products.length === 0 && (
               <tr>

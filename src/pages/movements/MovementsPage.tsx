@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { movementsApi } from "../../api/movements";
 import { productsApi } from "../../api/products";
+import { useToast } from "../../contexts/ToastContext";
 import { Modal } from "../../components/ui/Modal";
+import { TableSkeleton } from "../../components/ui/TableSkeleton";
 import { MovementForm } from "./MovementForm";
 import { movementReasonLabels } from "../../types/movement";
 import type { MovementType } from "../../types/movement";
@@ -18,6 +20,7 @@ function formatDateTime(dateString: string) {
 
 export function MovementsPage() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [modalType, setModalType] = useState<MovementType | null>(null);
 
   const { data: movements = [], isLoading } = useQuery({
@@ -37,6 +40,7 @@ export function MovementsPage() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       setModalType(null);
+      showToast("Entrada registrada com sucesso");
     },
   });
 
@@ -47,6 +51,7 @@ export function MovementsPage() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       setModalType(null);
+      showToast("Saída registrada com sucesso");
     },
   });
 
@@ -86,13 +91,7 @@ export function MovementsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {isLoading && (
-              <tr>
-                <td colSpan={6} className="text-center py-8 text-slate-500">
-                  Carregando...
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={6} />}
 
             {!isLoading && movements.length === 0 && (
               <tr>

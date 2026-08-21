@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "../../api/users";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import { Modal } from "../../components/ui/Modal";
+import { TableSkeleton } from "../../components/ui/TableSkeleton";
 import { UserForm } from "./UserForm";
 import type { User } from "../../types/user";
 
@@ -13,6 +15,7 @@ const roleLabels: Record<User["role"], string> = {
 
 export function UsersPage() {
   const { user: currentUser } = useAuth();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,6 +31,7 @@ export function UsersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setIsModalOpen(false);
+      showToast("Usuário criado com sucesso");
     },
   });
 
@@ -38,6 +42,7 @@ export function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setIsModalOpen(false);
       setEditingUser(undefined);
+      showToast("Usuário atualizado com sucesso");
     },
   });
 
@@ -78,13 +83,7 @@ export function UsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="text-center py-8 text-slate-500">
-                  Carregando...
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={5} />}
 
             {!isLoading && users.length === 0 && (
               <tr>

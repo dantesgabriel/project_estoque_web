@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { dashboardApi } from "../../api/dashboard";
 import { StatCard } from "../../components/ui/StatCard";
+import { StatCardSkeleton } from "../../components/ui/StatCardSkeleton";
 
 const activityLabels: Record<string, string> = {
   ENTRADA: "Entrada",
@@ -27,7 +28,22 @@ export function DashboardPage() {
   });
 
   if (isLoading) {
-    return <div className="p-8 text-sm text-slate-500">Carregando...</div>;
+    return (
+      <div className="p-8 max-w-6xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">Visão geral do estoque</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+          <StatCardSkeleton />
+        </div>
+        <div className="skeleton h-20 bg-slate-200 rounded-xl" />
+        <div className="skeleton h-48 bg-slate-200 rounded-xl" />
+      </div>
+    );
   }
 
   if (isError || !data) {

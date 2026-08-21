@@ -3,7 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { inventoryApi } from "../../api/inventory";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import { Modal } from "../../components/ui/Modal";
+import { TableSkeleton } from "../../components/ui/TableSkeleton";
 import { CreateInventoryForm } from "./CreateInventoryForm";
 import { InventoryStatusBadge } from "./InventoryStatusBadge";
 
@@ -17,6 +19,7 @@ function formatDate(dateString: string) {
 
 export function InventoryListPage() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isAdmin = user?.role === "ADMIN";
@@ -33,6 +36,7 @@ export function InventoryListPage() {
     onSuccess: (inventory) => {
       queryClient.invalidateQueries({ queryKey: ["inventories"] });
       setIsModalOpen(false);
+      showToast("Inventário criado com sucesso");
       navigate(`/inventarios/${inventory.id}`);
     },
   });
@@ -72,13 +76,7 @@ export function InventoryListPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="text-center py-8 text-slate-500">
-                  Carregando...
-                </td>
-              </tr>
-            )}
+            {isLoading && <TableSkeleton columns={5} />}
 
             {!isLoading && inventories.length === 0 && (
               <tr>

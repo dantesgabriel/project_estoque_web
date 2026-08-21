@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { inventoryApi } from "../../api/inventory";
 import { adjustmentsApi } from "../../api/adjustments";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import { InventoryStatusBadge } from "./InventoryStatusBadge";
 import { CountRow } from "./CountRow";
 import { AdjustmentPanel } from "./AdjustmentPanel";
@@ -12,6 +13,7 @@ import type { AdjustmentReason } from "../../types/adjustment";
 export function InventoryDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isAdmin = user?.role === "ADMIN";
@@ -30,6 +32,7 @@ export function InventoryDetailPage() {
       inventoryApi.submitCount(id!, itemId, countedQty, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory", id] });
+      showToast("Contagem registrada");
     },
   });
 
@@ -39,6 +42,7 @@ export function InventoryDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["inventory", id] });
       queryClient.invalidateQueries({ queryKey: ["inventories"] });
       setCloseError(null);
+      showToast("Inventário fechado com sucesso");
     },
     onError: (err: unknown) => {
       const message =
@@ -61,11 +65,17 @@ export function InventoryDetailPage() {
     onSuccess: (_data, variables) => {
       setAdjustedItemIds((prev) => new Set(prev).add(variables.inventoryItemId));
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      showToast("Ajuste aplicado, estoque corrigido");
     },
   });
 
   if (isLoading) {
-    return <div className="p-8 text-sm text-slate-500">Carregando...</div>;
+    return (
+      <div className="p-8 max-w-5xl mx-auto space-y-6">
+        <div className="skeleton h-7 bg-slate-200 rounded w-48" />
+        <div className="skeleton h-40 bg-slate-200 rounded-xl" />
+      </div>
+    );
   }
 
   if (!inventory) {
