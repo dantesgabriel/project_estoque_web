@@ -4,9 +4,10 @@ import { usersApi } from "../../api/users";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { Modal } from "../../components/ui/Modal";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { TableSkeleton } from "../../components/ui/TableSkeleton";
 import { UserForm } from "./UserForm";
-import type { User } from "../../types/user";
+import type { CreateUserInput, User } from "../../types/user";
 
 const roleLabels: Record<User["role"], string> = {
   ADMIN: "Administrador",
@@ -20,6 +21,9 @@ export function UsersPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
+  const [pendingDeactivation, setPendingDeactivation] = useState<
+    (CreateUserInput & { active?: boolean }) | null
+  >(null);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users"],
@@ -56,9 +60,34 @@ export function UsersPage() {
     setIsModalOpen(true);
   }
 
+  async function handleUserSubmit(input: CreateUserInput & { active?: boolean }) {
+    if (!editingUser) {
+      await createMutation.mutateAsync(input);
+      return;
+    }
+
+    // Desativar conta é uma ação sensível — pede confirmação antes de aplicar.
+    const isDeactivating = editingUser.active && input.active === false;
+
+    if (isDeactivating) {
+      setPendingDeactivation(input);
+      return;
+    }
+
+    const { name, role, active } = input;
+    await updateMutation.mutateAsync({ id: editingUser.id, input: { name, role, active } });
+  }
+
+  async function confirmDeactivation() {
+    if (!editingUser || !pendingDeactivation) return;
+    const { name, role, active } = pendingDeactivation;
+    await updateMutation.mutateAsync({ id: editingUser.id, input: { name, role, active } });
+    setPendingDeactivation(null);
+  }
+
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-slate-900">Usuários</h1>
           <p className="text-sm text-slate-500 mt-1">Gestão de acesso ao sistema</p>
@@ -72,6 +101,7 @@ export function UsersPage() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
             <tr>
@@ -126,6 +156,7 @@ export function UsersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {isModalOpen && (
@@ -142,16 +173,21 @@ export function UsersPage() {
               setIsModalOpen(false);
               setEditingUser(undefined);
             }}
-            onSubmit={async (input) => {
-              if (editingUser) {
-                const { name, role, active } = input;
-                await updateMutation.mutateAsync({ id: editingUser.id, input: { name, role, active } });
-              } else {
-                await createMutation.mutateAsync(input);
-              }
-            }}
+            onSubmit={handleUserSubmit}
           />
         </Modal>
+      )}
+
+      {pendingDeactivation && editingUser && (
+        <ConfirmDialog
+          title="Desativar usuário"
+          message={`Tem certeza que deseja desativar ${editingUser.name}? A pessoa não poderá mais fazer login no sistema até ser reativada.`}
+          confirmLabel="Desativar"
+          danger
+          isConfirming={updateMutation.isPending}
+          onConfirm={confirmDeactivation}
+          onCancel={() => setPendingDeactivation(null)}
+        />
       )}
     </div>
   );

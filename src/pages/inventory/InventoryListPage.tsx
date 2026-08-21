@@ -44,8 +44,8 @@ export function InventoryListPage() {
   const hasInProgress = inventories.some((inv) => inv.status === "IN_PROGRESS");
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-slate-900">Inventários</h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -65,6 +65,7 @@ export function InventoryListPage() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
             <tr>
@@ -106,6 +107,7 @@ export function InventoryListPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {isModalOpen && (

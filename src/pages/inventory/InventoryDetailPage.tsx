@@ -8,6 +8,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { InventoryStatusBadge } from "./InventoryStatusBadge";
 import { CountRow } from "./CountRow";
 import { AdjustmentPanel } from "./AdjustmentPanel";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import type { AdjustmentReason } from "../../types/adjustment";
 
 export function InventoryDetailPage() {
@@ -20,6 +21,7 @@ export function InventoryDetailPage() {
 
   const [adjustedItemIds, setAdjustedItemIds] = useState<Set<string>>(new Set());
   const [closeError, setCloseError] = useState<string | null>(null);
+  const [isConfirmingClose, setIsConfirmingClose] = useState(false);
 
   const { data: inventory, isLoading } = useQuery({
     queryKey: ["inventory", id],
@@ -42,6 +44,7 @@ export function InventoryDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["inventory", id] });
       queryClient.invalidateQueries({ queryKey: ["inventories"] });
       setCloseError(null);
+      setIsConfirmingClose(false);
       showToast("Inventário fechado com sucesso");
     },
     onError: (err: unknown) => {
@@ -49,6 +52,7 @@ export function InventoryDetailPage() {
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
         "Erro ao fechar inventário";
       setCloseError(message);
+      setIsConfirmingClose(false);
     },
   });
 
@@ -71,7 +75,7 @@ export function InventoryDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 max-w-5xl mx-auto space-y-6">
+      <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
         <div className="skeleton h-7 bg-slate-200 rounded w-48" />
         <div className="skeleton h-40 bg-slate-200 rounded-xl" />
       </div>
@@ -79,7 +83,7 @@ export function InventoryDetailPage() {
   }
 
   if (!inventory) {
-    return <div className="p-8 text-sm text-red-600">Inventário não encontrado.</div>;
+    return <div className="p-4 md:p-8 text-sm text-red-600">Inventário não encontrado.</div>;
   }
 
   const canCount = inventory.status === "IN_PROGRESS";
@@ -87,8 +91,8 @@ export function InventoryDetailPage() {
   const divergentCount = inventory.items.filter((item) => (item.divergence ?? 0) !== 0).length;
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <button
             onClick={() => navigate("/inventarios")}
@@ -109,7 +113,7 @@ export function InventoryDetailPage() {
         {isAdmin && canCount && (
           <div className="text-right">
             <button
-              onClick={() => closeMutation.mutate()}
+              onClick={() => setIsConfirmingClose(true)}
               disabled={!allCounted || closeMutation.isPending}
               title={!allCounted ? "Ainda existem itens sem contagem" : ""}
               className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg px-4 py-2.5 transition-colors"
@@ -121,6 +125,21 @@ export function InventoryDetailPage() {
         )}
       </div>
 
+      {isConfirmingClose && (
+        <ConfirmDialog
+          title="Fechar inventário"
+          message={
+            divergentCount > 0
+              ? `Existem ${inventory.items.filter((i) => (i.divergence ?? 0) !== 0).length} produto(s) com divergência ainda não confirmada. Depois de fechado, você vai precisar justificar cada divergência para corrigir o estoque. Deseja continuar?`
+              : "Depois de fechado, não será possível registrar novas contagens neste inventário. Deseja continuar?"
+          }
+          confirmLabel="Fechar inventário"
+          isConfirming={closeMutation.isPending}
+          onConfirm={() => closeMutation.mutate()}
+          onCancel={() => setIsConfirmingClose(false)}
+        />
+      )}
+
       {inventory.status === "COMPLETED" && divergentCount > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
           {divergentCount} produto(s) com divergência. Justifique e aplique o ajuste para corrigir
@@ -129,6 +148,7 @@ export function InventoryDetailPage() {
       )}
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
             <tr>
@@ -169,6 +189,7 @@ export function InventoryDetailPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

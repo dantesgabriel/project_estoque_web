@@ -78,8 +78,8 @@ export function ProductsPage() {
     }`;
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-slate-900">Produtos</h1>
           <p className="text-sm text-slate-500 mt-1">{products.length} produto(s) encontrado(s)</p>
@@ -128,6 +128,7 @@ export function ProductsPage() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
             <tr>
@@ -175,6 +176,7 @@ export function ProductsPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {isModalOpen && (
