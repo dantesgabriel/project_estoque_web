@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { AdjustmentReason } from "../../types/adjustment";
 import { adjustmentReasonLabels } from "../../types/adjustment";
+import { extractErrorMessage } from "../../api/errors";
 
 interface AdjustmentPanelProps {
   onSubmit: (reason: AdjustmentReason, note?: string) => Promise<void>;
@@ -20,9 +21,7 @@ export function AdjustmentPanel({ onSubmit }: AdjustmentPanelProps) {
       await onSubmit(reason, note || undefined);
       setDone(true);
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Erro ao aplicar ajuste";
+      const message = extractErrorMessage(err, "Erro ao aplicar ajuste");
       setError(message);
     } finally {
       setIsSubmitting(false);

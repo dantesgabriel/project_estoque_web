@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { CreateInventoryInput } from "../../types/inventory";
+import { extractErrorMessage } from "../../api/errors";
 
 interface CreateInventoryFormProps {
   onSubmit: (input: CreateInventoryInput) => Promise<void>;
@@ -23,9 +24,7 @@ export function CreateInventoryForm({ onSubmit, onCancel }: CreateInventoryFormP
       // Seleção parcial de produtos fica pra uma iteração futura, se necessário.
       await onSubmit({ name, blindMode });
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Erro ao criar inventário";
+      const message = extractErrorMessage(err, "Erro ao criar inventário");
       setError(message);
     } finally {
       setIsSubmitting(false);

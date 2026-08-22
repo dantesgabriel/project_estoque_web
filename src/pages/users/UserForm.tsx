@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { CreateUserInput, User, UserRole } from "../../types/user";
+import { extractErrorMessage } from "../../api/errors";
 
 interface UserFormProps {
   initialData?: User;
@@ -29,9 +30,7 @@ export function UserForm({ initialData, onSubmit, onCancel }: UserFormProps) {
       // aqui sempre passamos o shape completo, o pai extrai o que precisa.
       await onSubmit({ name, email, password, role, ...(isEditing ? { active } : {}) });
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Erro ao salvar usuário";
+      const message = extractErrorMessage(err, "Erro ao salvar usuário");
       setError(message);
     } finally {
       setIsSubmitting(false);

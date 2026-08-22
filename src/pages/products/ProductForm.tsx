@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Category, CreateProductInput, Product } from "../../types/product";
+import { extractErrorMessage } from "../../api/errors";
 
 interface ProductFormProps {
   categories: Category[];
@@ -38,9 +39,7 @@ export function ProductForm({ categories, initialData, onSubmit, onCancel }: Pro
         location: location || undefined,
       });
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Erro ao salvar produto";
+      const message = extractErrorMessage(err, "Erro ao salvar produto");
       setError(message);
     } finally {
       setIsSubmitting(false);

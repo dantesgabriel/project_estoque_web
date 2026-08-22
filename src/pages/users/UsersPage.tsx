@@ -7,6 +7,7 @@ import { Modal } from "../../components/ui/Modal";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { TableSkeleton } from "../../components/ui/TableSkeleton";
 import { UserForm } from "./UserForm";
+import { ResetPasswordModal } from "./ResetPasswordModal";
 import type { CreateUserInput, User } from "../../types/user";
 
 const roleLabels: Record<User["role"], string> = {
@@ -24,6 +25,7 @@ export function UsersPage() {
   const [pendingDeactivation, setPendingDeactivation] = useState<
     (CreateUserInput & { active?: boolean }) | null
   >(null);
+  const [resettingPasswordFor, setResettingPasswordFor] = useState<User | undefined>(undefined);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users"],
@@ -144,7 +146,13 @@ export function UsersPage() {
                     {user.active ? "Ativo" : "Inativo"}
                   </span>
                 </td>
-                <td className="px-5 py-3 text-right">
+                <td className="px-5 py-3 text-right space-x-3">
+                  <button
+                    onClick={() => setResettingPasswordFor(user)}
+                    className="text-slate-500 hover:text-slate-700 text-sm font-medium"
+                  >
+                    Redefinir senha
+                  </button>
                   <button
                     onClick={() => openEditModal(user)}
                     className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
@@ -187,6 +195,13 @@ export function UsersPage() {
           isConfirming={updateMutation.isPending}
           onConfirm={confirmDeactivation}
           onCancel={() => setPendingDeactivation(null)}
+        />
+      )}
+
+      {resettingPasswordFor && (
+        <ResetPasswordModal
+          user={resettingPasswordFor}
+          onClose={() => setResettingPasswordFor(undefined)}
         />
       )}
     </div>

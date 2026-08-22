@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import type { Product } from "../../types/product";
 import type { CreateMovementInput, MovementReason, MovementType } from "../../types/movement";
 import { movementReasonLabels } from "../../types/movement";
+import { extractErrorMessage } from "../../api/errors";
 
 // Motivos coerentes por tipo — entrada normalmente é compra; saída cobre os demais casos
 // (uso interno, atendimento, perda, descarte, vencimento). Documento seção 9.
@@ -45,9 +46,7 @@ export function MovementForm({ type, products, onSubmit, onCancel }: MovementFor
         note: note || undefined,
       });
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Erro ao registrar movimentação";
+      const message = extractErrorMessage(err, "Erro ao registrar movimentação");
       setError(message);
     } finally {
       setIsSubmitting(false);

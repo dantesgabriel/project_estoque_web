@@ -9,6 +9,7 @@ import { InventoryStatusBadge } from "./InventoryStatusBadge";
 import { CountRow } from "./CountRow";
 import { AdjustmentPanel } from "./AdjustmentPanel";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { extractErrorMessage } from "../../api/errors";
 import type { AdjustmentReason } from "../../types/adjustment";
 
 export function InventoryDetailPage() {
@@ -48,9 +49,7 @@ export function InventoryDetailPage() {
       showToast("Inventário fechado com sucesso");
     },
     onError: (err: unknown) => {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Erro ao fechar inventário";
+      const message = extractErrorMessage(err, "Erro ao fechar inventário");
       setCloseError(message);
       setIsConfirmingClose(false);
     },

@@ -6,4 +6,8 @@ export const authApi = {
     const { data } = await api.post<LoginResponse>("/auth/login", { email, password });
     return data;
   },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await api.post("/auth/change-password", { currentPassword, newPassword });
+  },
 };

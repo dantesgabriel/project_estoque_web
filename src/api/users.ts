@@ -16,4 +16,8 @@ export const usersApi = {
     const { data } = await api.patch<User>(`/users/${id}`, input);
     return data;
   },
+
+  async resetPassword(id: string, newPassword: string): Promise<void> {
+    await api.patch(`/users/${id}/password`, { newPassword });
+  },
 };

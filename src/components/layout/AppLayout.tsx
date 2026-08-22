@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { ChangePasswordModal } from "./ChangePasswordModal";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard" },
@@ -11,7 +12,13 @@ const navItems = [
 
 const adminNavItems = [{ to: "/usuarios", label: "Usuários" }];
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({
+  onNavigate,
+  onOpenChangePassword,
+}: {
+  onNavigate?: () => void;
+  onOpenChangePassword: () => void;
+}) {
   const { user, logout } = useAuth();
   const items = user?.role === "ADMIN" ? [...navItems, ...adminNavItems] : navItems;
 
@@ -44,6 +51,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           {user?.role === "ADMIN" ? "Administrador" : "Funcionário"}
         </p>
         <button
+          onClick={onOpenChangePassword}
+          className="w-full text-left rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 transition-colors"
+        >
+          Trocar senha
+        </button>
+        <button
           onClick={logout}
           className="w-full text-left rounded-lg px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100 transition-colors"
         >
@@ -56,6 +69,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AppLayout() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const location = useLocation();
 
   // Fecha o drawer automaticamente ao trocar de rota (evita ele ficar aberto
@@ -70,7 +84,7 @@ export function AppLayout() {
     <div className="min-h-screen flex bg-slate-50">
       {/* Sidebar fixa — só visível em telas médias pra cima. */}
       <aside className="hidden md:flex w-60 bg-white border-r border-slate-200 flex-col">
-        <SidebarContent />
+        <SidebarContent onOpenChangePassword={() => setIsChangePasswordOpen(true)} />
       </aside>
 
       {/* Drawer mobile — some/aparece com overlay, só existe abaixo de md. */}
@@ -81,7 +95,13 @@ export function AppLayout() {
             onClick={() => setIsDrawerOpen(false)}
           />
           <aside className="relative w-64 bg-white border-r border-slate-200 flex flex-col z-50">
-            <SidebarContent onNavigate={() => setIsDrawerOpen(false)} />
+            <SidebarContent
+              onNavigate={() => setIsDrawerOpen(false)}
+              onOpenChangePassword={() => {
+                setIsDrawerOpen(false);
+                setIsChangePasswordOpen(true);
+              }}
+            />
           </aside>
         </div>
       )}
@@ -105,6 +125,10 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
+
+      {isChangePasswordOpen && (
+        <ChangePasswordModal onClose={() => setIsChangePasswordOpen(false)} />
+      )}
     </div>
   );
 }

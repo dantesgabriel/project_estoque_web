@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { extractErrorMessage } from "../../api/errors";
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -20,8 +21,10 @@ export function LoginPage() {
     try {
       await login(email, password);
       navigate("/dashboard");
-    } catch {
-      setError("Email ou senha inválidos");
+    } catch (err: unknown) {
+      // Erro de credenciais o backend já manda "Credenciais inválidas" — o helper
+      // também cobre falha de rede (API fora do ar), que antes ficava mascarada.
+      setError(extractErrorMessage(err, "Email ou senha inválidos"));
     } finally {
       setIsSubmitting(false);
     }
