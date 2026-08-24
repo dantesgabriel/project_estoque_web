@@ -73,21 +73,22 @@ export function ProductsPage() {
   const filterButtonClass = (active: boolean | undefined) =>
     `text-xs font-medium rounded-full px-3 py-1.5 border transition-colors ${
       active
-        ? "bg-indigo-600 border-indigo-600 text-white"
+        ? "bg-teal-600 border-teal-600 text-white"
         : "bg-white border-slate-300 text-slate-600 hover:bg-slate-50"
     }`;
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Produtos</h1>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Catálogo</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Produtos</h1>
           <p className="text-sm text-slate-500 mt-1">{products.length} produto(s) encontrado(s)</p>
         </div>
         {isAdmin && (
           <button
             onClick={openCreateModal}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 transition-colors"
+            className="rounded-xl bg-[#102a35] px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-[#17404d]"
           >
             Novo produto
           </button>
@@ -100,7 +101,7 @@ export function ProductsPage() {
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             placeholder="Buscar por nome..."
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
           />
         </form>
 
@@ -109,7 +110,7 @@ export function ProductsPage() {
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, categoryId: e.target.value || undefined }))
           }
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm"
         >
           <option value="">Todas as categorias</option>
           {categories.map((category) => (
@@ -127,10 +128,10 @@ export function ProductsPage() {
         </button>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
         <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
+          <thead className="bg-slate-50/80 text-slate-500 text-xs uppercase tracking-wide">
             <tr>
               <th className="text-left px-5 py-3 font-medium">Nome</th>
               <th className="text-left px-5 py-3 font-medium">SKU</th>

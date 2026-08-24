@@ -53,10 +53,14 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Visão geral do estoque</p>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-7">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">Central de operação</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Visão geral do estoque</h1>
+          <p className="text-sm text-slate-500 mt-1">Acompanhe a saúde do seu estoque em tempo real.</p>
+        </div>
+        <div className="flex items-center gap-2 rounded-xl border border-teal-100 bg-teal-50 px-3 py-2 text-xs font-medium text-teal-800"><span className="size-2 rounded-full bg-teal-500 animate-pulse" />Tudo saudável por aqui</div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -67,39 +71,43 @@ export function DashboardPage() {
       </div>
 
       {/* Ação principal — "INICIAR INVENTÁRIO", pedida na seção 18 do projeto. */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 flex items-center justify-between">
-        <div>
+      <div className="vet-pattern relative overflow-hidden rounded-2xl bg-[#102a35] p-6 text-white shadow-lg shadow-slate-300/40 sm:flex sm:items-center sm:justify-between">
+        <div className="relative z-10">
+          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-300"><span className="text-base">🐾</span> Inventário</p>
           {data.inventoryInProgress ? (
             <>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="mt-2 text-lg font-bold">
                 Inventário em andamento: {data.inventoryInProgress.name}
               </p>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-sm text-slate-300 mt-1">
                 Iniciado em {formatDate(data.inventoryInProgress.createdAt)}
               </p>
             </>
           ) : (
-            <p className="text-sm text-slate-500">Nenhum inventário em andamento no momento</p>
+            <><p className="mt-2 text-lg font-bold">Seu estoque, sempre sob controle.</p><p className="mt-1 text-sm text-slate-300">Nenhum inventário em andamento no momento.</p></>
           )}
         </div>
         <button
           onClick={() => navigate("/inventarios")}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 transition-colors whitespace-nowrap"
+          className="relative z-10 mt-5 rounded-xl bg-teal-400 px-4 py-3 text-sm font-bold text-slate-950 transition-colors hover:bg-teal-300 sm:mt-0 whitespace-nowrap"
         >
           {data.inventoryInProgress ? "Continuar inventário" : "Iniciar inventário"}
         </button>
+        <div className="absolute -right-10 -top-16 size-52 rounded-full border-[28px] border-teal-400/10" />
       </div>
 
       <div>
-        <h2 className="text-sm font-medium text-slate-900 mb-3">Últimas movimentações</h2>
-        <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+        <div className="mb-3 flex items-center justify-between"><h2 className="text-base font-bold text-slate-900">Últimas movimentações</h2><span className="text-xs font-medium text-slate-400">Atividade recente</span></div>
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm divide-y divide-slate-100">
           {data.recentActivity.length === 0 && (
             <p className="p-5 text-sm text-slate-500">Nenhuma movimentação registrada ainda</p>
           )}
 
           {data.recentActivity.map((activity, index) => (
-            <div key={index} className="flex items-center justify-between px-5 py-3">
-              <div>
+            <div key={index} className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-slate-50/80">
+              <div className="flex items-center gap-3">
+                <span className={`grid size-9 place-items-center rounded-xl text-sm font-bold ${activity.quantity < 0 ? "bg-rose-50 text-rose-600" : "bg-teal-50 text-teal-700"}`}>{activity.quantity < 0 ? "−" : "+"}</span>
+                <div>
                 <p className="text-sm text-slate-900">
                   <span className="font-medium">{activityLabels[activity.type]}</span> ·{" "}
                   {activity.productName}
@@ -107,6 +115,7 @@ export function DashboardPage() {
                 <p className="text-xs text-slate-500 mt-0.5">
                   {activity.userName} · {formatDate(activity.date)}
                 </p>
+                </div>
               </div>
               <span
                 className={`text-sm font-medium ${
