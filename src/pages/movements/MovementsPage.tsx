@@ -6,6 +6,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { Modal } from "../../components/ui/Modal";
 import { TableSkeleton } from "../../components/ui/TableSkeleton";
 import { MovementForm } from "./MovementForm";
+import { ExportButtons } from "../../components/ui/ExportButtons";
 import { movementReasonLabels } from "../../types/movement";
 import type { MovementType } from "../../types/movement";
 
@@ -62,7 +63,21 @@ export function MovementsPage() {
           <h1 className="text-xl font-semibold text-slate-900">Movimentações</h1>
           <p className="text-sm text-slate-500 mt-1">Histórico de entradas e saídas de estoque</p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <ExportButtons
+            filename="historico_movimentacoes"
+            title="Histórico de movimentações"
+            rows={movements}
+            columns={[
+              { header: "Data", value: (movement) => formatDateTime(movement.createdAt) },
+              { header: "Produto", value: (movement) => movement.product.name },
+              { header: "Tipo", value: (movement) => movement.type === "IN" ? "Entrada" : "Saída" },
+              { header: "Quantidade", value: (movement) => movement.quantity },
+              { header: "Unidade", value: (movement) => movement.product.unit },
+              { header: "Motivo", value: (movement) => movementReasonLabels[movement.reason] },
+              { header: "Usuário", value: (movement) => movement.user.name },
+            ]}
+          />
           <button
             onClick={() => setModalType("OUT")}
             className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 transition-colors"

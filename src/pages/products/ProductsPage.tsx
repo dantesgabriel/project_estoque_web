@@ -8,6 +8,7 @@ import { Modal } from "../../components/ui/Modal";
 import { StockBadge } from "../../components/ui/StockBadge";
 import { TableSkeleton } from "../../components/ui/TableSkeleton";
 import { ProductForm } from "./ProductForm";
+import { ExportButtons } from "../../components/ui/ExportButtons";
 import type { Product, ProductFilters } from "../../types/product";
 
 export function ProductsPage() {
@@ -85,14 +86,30 @@ export function ProductsPage() {
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Produtos</h1>
           <p className="text-sm text-slate-500 mt-1">{products.length} produto(s) encontrado(s)</p>
         </div>
-        {isAdmin && (
-          <button
-            onClick={openCreateModal}
-            className="rounded-xl bg-[#102a35] px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-[#17404d]"
-          >
-            Novo produto
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportButtons
+            filename="relatorio_estoque"
+            title="Relatório de estoque"
+            rows={products}
+            columns={[
+              { header: "Produto", value: (product) => product.name },
+              { header: "SKU", value: (product) => product.sku },
+              { header: "Categoria", value: (product) => product.category.name },
+              { header: "Estoque atual", value: (product) => product.currentStock },
+              { header: "Unidade", value: (product) => product.unit },
+              { header: "Estoque mínimo", value: (product) => product.minStock },
+              { header: "Localização", value: (product) => product.location ?? "-" },
+            ]}
+          />
+          {isAdmin && (
+            <button
+              onClick={openCreateModal}
+              className="rounded-xl bg-[#102a35] px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-[#17404d]"
+            >
+              Novo produto
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
