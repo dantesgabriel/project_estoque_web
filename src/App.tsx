@@ -6,6 +6,7 @@ import { InventoryListPage } from "./pages/inventory/InventoryListPage";
 import { InventoryDetailPage } from "./pages/inventory/InventoryDetailPage";
 import { MovementsPage } from "./pages/movements/MovementsPage";
 import { UsersPage } from "./pages/users/UsersPage";
+import { SuppliersPage } from "./pages/suppliers/SuppliersPage";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { AdminRoute } from "./routes/AdminRoute";
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/movimentacoes" element={<MovementsPage />} />
 
           <Route element={<AdminRoute />}>
+            <Route path="/fornecedores" element={<SuppliersPage />} />
             <Route path="/usuarios" element={<UsersPage />} />
           </Route>
         </Route>

@@ -10,13 +10,17 @@ const navItems = [
   { to: "/movimentacoes", label: "Movimentações" },
 ];
 
-const adminNavItems = [{ to: "/usuarios", label: "Usuários" }];
+const adminNavItems = [
+  { to: "/fornecedores", label: "Fornecedores" },
+  { to: "/usuarios", label: "Usuários" },
+];
 
 const navIcons: Record<string, React.ReactNode> = {
   "/dashboard": <path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z" />,
   "/produtos": <path d="M20 7 12 3 4 7m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M8 5l8 4" />,
   "/inventarios": <path d="M9 5h6m-6 4h6m-6 4h4M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />,
   "/movimentacoes": <path d="M7 7h10m0 0-3-3m3 3-3 3M17 17H7m0 0 3-3m-3 3 3 3" />,
+  "/fornecedores": <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M8 10h.01M12 10h.01M16 10h.01" />,
   "/usuarios": <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m17-9a4 4 0 1 0 0-8m-3 2.5a4 4 0 0 1 0 7M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />,
 };
 
