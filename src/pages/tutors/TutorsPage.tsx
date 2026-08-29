@@ -1,0 +1,15 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { tutorsApi } from "../../api/tutors";
+import { Modal } from "../../components/ui/Modal";
+import { useToast } from "../../contexts/ToastContext";
+import { TutorForm } from "./TutorForm";
+import type { CreateTutorInput } from "../../types/tutor";
+
+export function TutorsPage() {
+  const [search, setSearch] = useState(""); const [isModalOpen, setIsModalOpen] = useState(false); const queryClient = useQueryClient(); const { showToast } = useToast();
+  const { data: tutors = [], isLoading } = useQuery({ queryKey: ["tutors", search], queryFn: () => tutorsApi.list(search) });
+  const create = useMutation({ mutationFn: tutorsApi.create, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["tutors"] }); setIsModalOpen(false); showToast("Tutor cadastrado com sucesso"); } });
+  return <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-8"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-teal-700">Cadastros</p><h1 className="text-2xl font-bold text-slate-900">Tutores e pets</h1><p className="mt-1 text-sm text-slate-500">Responsáveis pelos pacientes da clínica.</p></div><button onClick={() => setIsModalOpen(true)} className="rounded-xl bg-[#102a35] px-4 py-3 text-sm font-bold text-white">Novo tutor</button></div><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="🔎 Buscar por nome, CPF/CNPJ ou telefone" className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"/><div className="overflow-hidden rounded-2xl border border-slate-200 bg-white"><table className="w-full text-sm"><thead className="bg-slate-50 text-left text-xs uppercase text-slate-500"><tr><th className="px-5 py-3">Tutor</th><th className="px-5 py-3">Documento</th><th className="px-5 py-3">Contato</th><th className="px-5 py-3">Pets</th><th className="px-5 py-3"/></tr></thead><tbody className="divide-y divide-slate-100">{!isLoading && tutors.length === 0 && <tr><td colSpan={5} className="py-8 text-center text-slate-500">Nenhum tutor encontrado</td></tr>}{tutors.map((tutor) => <tr key={tutor.id} className="hover:bg-slate-50"><td className="px-5 py-3 font-medium text-slate-900">{tutor.name}</td><td className="px-5 py-3">{tutor.document}</td><td className="px-5 py-3"><div>{tutor.phone}</div><div className="text-xs text-slate-400">{tutor.email}</div></td><td className="px-5 py-3">{tutor._count?.pets ?? 0}</td><td className="px-5 py-3 text-right"><Link to={`/tutores/${tutor.id}`} className="font-medium text-indigo-600">Ver perfil</Link></td></tr>)}</tbody></table></div>{isModalOpen && <Modal title="Novo tutor" onClose={() => setIsModalOpen(false)}><TutorForm onCancel={() => setIsModalOpen(false)} onSubmit={(input: CreateTutorInput) => create.mutateAsync(input)} /></Modal>}</div>;
+}

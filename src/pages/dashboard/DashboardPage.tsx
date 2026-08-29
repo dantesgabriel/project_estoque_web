@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { DashboardActivity } from "../../types/dashboard";
 import { useNavigate } from "react-router-dom";
 import { dashboardApi } from "../../api/dashboard";
 import { StatCard } from "../../components/ui/StatCard";
@@ -8,6 +10,17 @@ const activityLabels: Record<string, string> = {
   ENTRADA: "Entrada",
   SAIDA: "Saída",
   AJUSTE: "Ajuste",
+};
+
+type SearchField = "all" | "date" | "user" | "sku" | "product" | "category";
+
+const searchLabels: Record<SearchField, string> = {
+  all: "Todos os campos",
+  date: "Data",
+  user: "Usuário",
+  sku: "SKU",
+  product: "Produto",
+  category: "Categoria",
 };
 
 function formatDate(dateString: string) {
@@ -21,6 +34,9 @@ function formatDate(dateString: string) {
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchField, setSearchField] = useState<SearchField>("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["dashboard"],
@@ -51,6 +67,23 @@ export function DashboardPage() {
       <div className="p-8 text-sm text-red-600">Não foi possível carregar o dashboard.</div>
     );
   }
+
+  function matchesSearch(activity: DashboardActivity) {
+    const term = searchTerm.trim().toLocaleLowerCase("pt-BR");
+    if (!term) return true;
+    const date = new Date(activity.date);
+    const values: Record<SearchField, string> = {
+      all: [activity.productName, activity.sku, activity.categoryName, activity.userName, formatDate(activity.date), date.toISOString().slice(0, 10)].join(" "),
+      date: `${formatDate(activity.date)} ${date.toISOString().slice(0, 10)}`,
+      user: activity.userName,
+      sku: activity.sku,
+      product: activity.productName,
+      category: activity.categoryName,
+    };
+    return values[searchField].toLocaleLowerCase("pt-BR").includes(term);
+  }
+
+  const filteredActivity = data.recentActivity.filter(matchesSearch);
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-7">
@@ -97,13 +130,40 @@ export function DashboardPage() {
       </div>
 
       <div>
-        <div className="mb-3 flex items-center justify-between"><h2 className="text-base font-bold text-slate-900">Últimas movimentações</h2><span className="text-xs font-medium text-slate-400">Atividade recente</span></div>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-slate-900">Últimas movimentações</h2>
+          <div className="flex items-center gap-2">
+            <span className="hidden text-xs font-medium text-slate-400 sm:inline">Atividade recente</span>
+            <button
+              type="button"
+              onClick={() => setIsSearchOpen((open) => !open)}
+              aria-label="Pesquisar movimentações"
+              aria-expanded={isSearchOpen}
+              className={`grid size-9 place-items-center rounded-xl border transition-colors ${isSearchOpen ? "border-teal-300 bg-teal-50 text-teal-700" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+            >
+              <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="6" /><path strokeLinecap="round" d="m16 16 4 4" /></svg>
+            </button>
+          </div>
+        </div>
+        {isSearchOpen && (
+          <div className="mb-3 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:flex-row">
+            <select value={searchField} onChange={(event) => setSearchField(event.target.value as SearchField)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-teal-500">
+              {(Object.keys(searchLabels) as SearchField[]).map((field) => <option key={field} value={field}>{searchLabels[field]}</option>)}
+            </select>
+            <div className="relative flex-1"><svg className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="6" /><path strokeLinecap="round" d="m16 16 4 4" /></svg><input autoFocus value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder={`Buscar por ${searchLabels[searchField].toLocaleLowerCase("pt-BR")}...`} className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-teal-500" /></div>
+            {searchTerm && <button type="button" onClick={() => setSearchTerm("")} className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100">Limpar</button>}
+          </div>
+        )}
         <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm divide-y divide-slate-100">
           {data.recentActivity.length === 0 && (
             <p className="p-5 text-sm text-slate-500">Nenhuma movimentação registrada ainda</p>
           )}
 
-          {data.recentActivity.map((activity, index) => (
+          {data.recentActivity.length > 0 && filteredActivity.length === 0 && (
+            <p className="p-5 text-sm text-slate-500">Nenhuma movimentação encontrada para essa busca.</p>
+          )}
+
+          {filteredActivity.map((activity, index) => (
             <div key={index} className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-slate-50/80">
               <div className="flex items-center gap-3">
                 <span className={`grid size-9 place-items-center rounded-xl text-sm font-bold ${activity.quantity < 0 ? "bg-rose-50 text-rose-600" : "bg-teal-50 text-teal-700"}`}>{activity.quantity < 0 ? "−" : "+"}</span>
@@ -113,7 +173,7 @@ export function DashboardPage() {
                   {activity.productName}
                 </p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {activity.userName} · {formatDate(activity.date)}
+                  {activity.userName} · {formatDate(activity.date)} · SKU {activity.sku} · {activity.categoryName}
                 </p>
                 </div>
               </div>

@@ -7,6 +7,9 @@ import { InventoryDetailPage } from "./pages/inventory/InventoryDetailPage";
 import { MovementsPage } from "./pages/movements/MovementsPage";
 import { UsersPage } from "./pages/users/UsersPage";
 import { SuppliersPage } from "./pages/suppliers/SuppliersPage";
+import { TutorsPage } from "./pages/tutors/TutorsPage";
+import { TutorDetailPage } from "./pages/tutors/TutorDetailPage";
+import { AppointmentsPage } from "./pages/appointments/AppointmentsPage";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { AdminRoute } from "./routes/AdminRoute";
@@ -23,6 +26,9 @@ export default function App() {
           <Route path="/inventarios" element={<InventoryListPage />} />
           <Route path="/inventarios/:id" element={<InventoryDetailPage />} />
           <Route path="/movimentacoes" element={<MovementsPage />} />
+          <Route path="/tutores" element={<TutorsPage />} />
+          <Route path="/tutores/:id" element={<TutorDetailPage />} />
+          <Route path="/atendimentos" element={<AppointmentsPage />} />
 
           <Route element={<AdminRoute />}>
             <Route path="/fornecedores" element={<SuppliersPage />} />

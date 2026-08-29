@@ -17,6 +17,7 @@ export interface Product {
   location: string | null;
   currentStock: number;
   active: boolean;
+  tracksBatch: boolean;
   createdAt: string;
   updatedAt: string;
 }

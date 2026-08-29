@@ -1,6 +1,8 @@
 export interface DashboardActivity {
   type: "ENTRADA" | "SAIDA" | "AJUSTE";
   productName: string;
+  sku: string;
+  categoryName: string;
   quantity: number;
   userName: string;
   date: string;
