@@ -11,6 +11,8 @@ import { TutorsPage } from "./pages/tutors/TutorsPage";
 import { TutorDetailPage } from "./pages/tutors/TutorDetailPage";
 import { AppointmentsPage } from "./pages/appointments/AppointmentsPage";
 import { ReportsPage } from "./pages/reports/ReportsPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
+import { PrivacyPage } from "./pages/PrivacyPage";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { AdminRoute } from "./routes/AdminRoute";
@@ -19,6 +21,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/privacidade" element={<PrivacyPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
@@ -40,7 +43,7 @@ export default function App() {
       </Route>
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

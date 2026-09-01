@@ -1,0 +1,10 @@
+{
+  "name": "Estoque Vet",
+  "short_name": "Estoque Vet",
+  "description": "Gestão de estoque e operação para clínicas veterinárias.",
+  "start_url": "/login",
+  "display": "standalone",
+  "background_color": "#f5f8fa",
+  "theme_color": "#102a35",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

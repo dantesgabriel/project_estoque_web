@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { extractErrorMessage } from "../../api/errors";
 
@@ -91,6 +91,12 @@ export function LoginPage() {
             {isSubmitting ? "Entrando..." : "Entrar"}
           </button>
         </form>
+        <footer className="mt-5 text-center text-xs leading-relaxed text-slate-500">
+          Ao acessar, você concorda com o uso do sistema pela clínica responsável.{" "}
+          <Link className="font-medium text-teal-700 hover:text-teal-800 hover:underline" to="/privacidade">
+            Política de privacidade
+          </Link>
+        </footer>
       </div>
       </div>
     </div>
