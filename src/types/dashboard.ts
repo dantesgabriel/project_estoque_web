@@ -13,6 +13,8 @@ export interface DashboardSummary {
   lowStockCount: number;
   zeroStockCount: number;
   pendingDivergences: number;
+  expiredBatchesCount: number;
+  expiringSoonBatchesCount: number;
   inventoryInProgress: { id: string; name: string; createdAt: string } | null;
   recentActivity: DashboardActivity[];
 }

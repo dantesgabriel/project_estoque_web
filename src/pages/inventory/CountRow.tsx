@@ -1,17 +1,30 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { InventoryItem } from "../../types/inventory";
 
 interface CountRowProps {
   item: InventoryItem;
   canCount: boolean;
   blindMode: boolean;
+  scannedQty?: number;
+  shouldFocus?: boolean;
   onSubmit: (countedQty: number, note?: string) => Promise<void>;
 }
 
-export function CountRow({ item, canCount, blindMode, onSubmit }: CountRowProps) {
+export function CountRow({ item, canCount, blindMode, scannedQty, shouldFocus, onSubmit }: CountRowProps) {
   const [countedQty, setCountedQty] = useState(item.countedQty?.toString() ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const alreadyCounted = item.countedQty !== null;
+
+  // Cada leitura representa uma unidade física. A confirmação continua explícita,
+  // para que o usuário possa corrigir ou complementar a contagem antes de gravar.
+  useEffect(() => {
+    if (scannedQty !== undefined) setCountedQty(String(scannedQty));
+  }, [scannedQty]);
+
+  useEffect(() => {
+    if (shouldFocus) inputRef.current?.focus();
+  }, [shouldFocus]);
 
   async function handleSubmit() {
     if (countedQty === "") return;
@@ -24,7 +37,7 @@ export function CountRow({ item, canCount, blindMode, onSubmit }: CountRowProps)
   }
 
   return (
-    <tr className="hover:bg-slate-50">
+    <tr className={`hover:bg-slate-50 ${shouldFocus ? "bg-teal-50 ring-1 ring-inset ring-teal-300" : ""}`}>
       <td className="px-5 py-3 text-slate-900 font-medium">{item.product.name}</td>
       <td className="px-5 py-3 text-slate-600">{item.product.sku}</td>
       <td className="px-5 py-3 text-slate-600">
@@ -38,6 +51,7 @@ export function CountRow({ item, canCount, blindMode, onSubmit }: CountRowProps)
       <td className="px-5 py-3">
         {canCount && !alreadyCounted ? (
           <input
+            ref={inputRef}
             type="number"
             min={0}
             value={countedQty}

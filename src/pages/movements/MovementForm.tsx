@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { isAxiosError } from "axios";
 import type { FormEvent } from "react";
 import type { Product } from "../../types/product";
 import type { CreateMovementInput, MovementReason, MovementType } from "../../types/movement";
 import { movementReasonLabels } from "../../types/movement";
 import { extractErrorMessage } from "../../api/errors";
+import { BarcodeScannerModal } from "../../components/barcode/BarcodeScannerModal";
+import { BarcodeAssociationModal } from "../../components/barcode/BarcodeAssociationModal";
+import { productsApi } from "../../api/products";
 
 // Motivos coerentes por tipo — entrada normalmente é compra; saída cobre os demais casos
 // (uso interno, atendimento, perda, descarte, vencimento). Documento seção 9.
@@ -28,8 +32,34 @@ export function MovementForm({ type, products, onSubmit, onCancel }: MovementFor
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [pendingBarcode, setPendingBarcode] = useState<string | null>(null);
 
   const selectedProduct = products.find((p) => p.id === productId);
+
+  async function handleBarcodeScan(barcode: string) {
+    try {
+      const product = await productsApi.getByBarcode(barcode);
+      if (!products.some((availableProduct) => availableProduct.id === product.id)) {
+        throw new Error("Este produto está inativo e não pode ser movimentado");
+      }
+      setProductId(product.id);
+      setError(null);
+    } catch (scanError) {
+      if (isAxiosError(scanError) && scanError.response?.status === 404) {
+        setPendingBarcode(barcode);
+        return;
+      }
+      throw new Error(extractErrorMessage(scanError, "Produto não encontrado para este código"));
+    }
+  }
+
+  async function associateBarcode(productId: string) {
+    if (!pendingBarcode) return;
+    await productsApi.addBarcode(productId, pendingBarcode);
+    setProductId(productId);
+    setError(null);
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -60,7 +90,10 @@ export function MovementForm({ type, products, onSubmit, onCancel }: MovementFor
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelClass}>Produto</label>
+        <div className="mb-1 flex items-center justify-between">
+          <label className={labelClass}>Produto</label>
+          <button type="button" onClick={() => setIsScannerOpen(true)} className="text-xs font-medium text-indigo-600 hover:text-indigo-800">Escanear código</button>
+        </div>
         <select
           required
           value={productId}
@@ -153,6 +186,9 @@ export function MovementForm({ type, products, onSubmit, onCancel }: MovementFor
           {isSubmitting ? "Registrando..." : type === "IN" ? "Registrar entrada" : "Registrar saída"}
         </button>
       </div>
+
+      {isScannerOpen && <BarcodeScannerModal onClose={() => setIsScannerOpen(false)} onScan={handleBarcodeScan} />}
+      {pendingBarcode && <BarcodeAssociationModal barcode={pendingBarcode} products={products} onClose={() => setPendingBarcode(null)} onAssociate={associateBarcode} />}
     </form>
   );
 }

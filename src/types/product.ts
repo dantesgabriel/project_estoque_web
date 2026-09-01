@@ -18,6 +18,7 @@ export interface Product {
   currentStock: number;
   active: boolean;
   tracksBatch: boolean;
+  barcodes?: { id: string; barcode: string; createdAt: string }[];
   createdAt: string;
   updatedAt: string;
 }

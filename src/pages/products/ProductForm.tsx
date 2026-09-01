@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Category, CreateProductInput, Product } from "../../types/product";
 import { extractErrorMessage } from "../../api/errors";
+import { BarcodeScannerModal } from "../../components/barcode/BarcodeScannerModal";
 
 interface ProductFormProps {
   categories: Category[];
@@ -21,6 +22,7 @@ export function ProductForm({ categories, initialData, onSubmit, onCancel }: Pro
   const [location, setLocation] = useState(initialData?.location ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -73,12 +75,11 @@ export function ProductForm({ categories, initialData, onSubmit, onCancel }: Pro
           />
         </div>
         <div>
-          <label className={labelClass}>Código de barras</label>
-          <input
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            className={inputClass}
-          />
+          <div className="mb-1 flex items-center justify-between">
+            <label className={labelClass}>Código de barras</label>
+            <button type="button" onClick={() => setIsScannerOpen(true)} className="text-xs font-medium text-indigo-600 hover:text-indigo-800">Escanear</button>
+          </div>
+          <input value={barcode} onChange={(e) => setBarcode(e.target.value)} className={inputClass} />
         </div>
       </div>
 
@@ -166,6 +167,13 @@ export function ProductForm({ categories, initialData, onSubmit, onCancel }: Pro
           {isSubmitting ? "Salvando..." : "Salvar"}
         </button>
       </div>
+
+      {isScannerOpen && (
+        <BarcodeScannerModal
+          onClose={() => setIsScannerOpen(false)}
+          onScan={(code) => { setBarcode(code); setError(null); }}
+        />
+      )}
     </form>
   );
 }

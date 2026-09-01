@@ -20,4 +20,14 @@ export const productsApi = {
     const { data } = await api.patch<Product>(`/products/${id}`, input);
     return data;
   },
+
+  async getByBarcode(barcode: string): Promise<Product> {
+    const { data } = await api.get<Product>(`/products/barcode/${encodeURIComponent(barcode)}`);
+    return data;
+  },
+
+  async addBarcode(productId: string, barcode: string): Promise<Product> {
+    const { data } = await api.post<Product>(`/products/${productId}/barcodes`, { barcode });
+    return data;
+  },
 };

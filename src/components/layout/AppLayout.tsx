@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { ChangePasswordModal } from "./ChangePasswordModal";
+import { NotificationsBell } from "./NotificationsBell";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard" },
@@ -10,6 +11,7 @@ const navItems = [
   { to: "/movimentacoes", label: "Movimentações" },
   { to: "/tutores", label: "Tutores e pets" },
   { to: "/atendimentos", label: "Atendimentos" },
+  { to: "/relatorios", label: "Relatórios" },
 ];
 
 const adminNavItems = [
@@ -24,6 +26,7 @@ const navIcons: Record<string, React.ReactNode> = {
   "/movimentacoes": <path d="M7 7h10m0 0-3-3m3 3-3 3M17 17H7m0 0 3-3m-3 3 3 3" />,
   "/tutores": <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m17-9a4 4 0 1 0 0-8m-3 2.5a4 4 0 0 1 0 7M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />,
   "/atendimentos": <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-13v8m-4-4h8" />,
+  "/relatorios": <path d="M4 19V5m0 14h16M8 16v-4m4 4V8m4 8v-6" />,
   "/fornecedores": <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M8 10h.01M12 10h.01M16 10h.01" />,
   "/usuarios": <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m17-9a4 4 0 1 0 0-8m-3 2.5a4 4 0 0 1 0 7M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />,
 };
@@ -133,6 +136,7 @@ export function AppLayout() {
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
+        <header className="hidden h-14 items-center justify-end border-b border-slate-200 bg-white px-6 md:flex"><NotificationsBell /></header>
         {/* Barra superior só em mobile, com o botão de abrir o menu. */}
         <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-[#102a35] text-white shadow-sm">
           <button
@@ -145,6 +149,7 @@ export function AppLayout() {
             </svg>
           </button>
           <h1 className="text-sm font-semibold">Estoque Vet</h1>
+          <div className="ml-auto"><NotificationsBell /></div>
         </div>
 
         <main className="flex-1 overflow-y-auto">

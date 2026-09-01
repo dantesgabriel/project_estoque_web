@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productsApi } from "../../api/products";
 import { categoriesApi } from "../../api/categories";
@@ -16,11 +17,18 @@ export function ProductsPage() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const isAdmin = user?.role === "ADMIN";
+  const [searchParams] = useSearchParams();
 
   const [filters, setFilters] = useState<ProductFilters>({});
   const [nameInput, setNameInput] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
+
+  useEffect(() => {
+    const alert = searchParams.get("alert");
+    if (alert === "low-stock") setFilters({ lowStock: true });
+    if (alert === "zero-stock") setFilters({ zeroStock: true });
+  }, [searchParams]);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],

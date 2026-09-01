@@ -1,4 +1,5 @@
 import { Fragment, useState } from "react";
+import { isAxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { inventoryApi } from "../../api/inventory";
@@ -11,6 +12,9 @@ import { AdjustmentPanel } from "./AdjustmentPanel";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { extractErrorMessage } from "../../api/errors";
 import type { AdjustmentReason } from "../../types/adjustment";
+import { BarcodeScannerModal } from "../../components/barcode/BarcodeScannerModal";
+import { BarcodeAssociationModal } from "../../components/barcode/BarcodeAssociationModal";
+import { productsApi } from "../../api/products";
 
 export function InventoryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +27,10 @@ export function InventoryDetailPage() {
   const [adjustedItemIds, setAdjustedItemIds] = useState<Set<string>>(new Set());
   const [closeError, setCloseError] = useState<string | null>(null);
   const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scannedQtyByItem, setScannedQtyByItem] = useState<Record<string, number>>({});
+  const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
+  const [pendingBarcode, setPendingBarcode] = useState<string | null>(null);
 
   const { data: inventory, isLoading } = useQuery({
     queryKey: ["inventory", id],
@@ -85,9 +93,39 @@ export function InventoryDetailPage() {
     return <div className="p-4 md:p-8 text-sm text-red-600">Inventário não encontrado.</div>;
   }
 
-  const canCount = inventory.status === "IN_PROGRESS";
-  const allCounted = inventory.items.every((item) => item.countedQty !== null);
-  const divergentCount = inventory.items.filter((item) => (item.divergence ?? 0) !== 0).length;
+  const currentInventory = inventory;
+
+  const canCount = currentInventory.status === "IN_PROGRESS";
+  const allCounted = currentInventory.items.every((item) => item.countedQty !== null);
+  const divergentCount = currentInventory.items.filter((item) => (item.divergence ?? 0) !== 0).length;
+
+  function addScannedUnit(productId: string) {
+    const item = currentInventory.items.find((inventoryItem) => inventoryItem.productId === productId);
+    if (!item) throw new Error("Este produto não faz parte deste inventário");
+    if (item.countedQty !== null) throw new Error("A contagem deste produto já foi confirmada");
+    setScannedQtyByItem((current) => ({ ...current, [item.id]: (current[item.id] ?? 0) + 1 }));
+    setFocusedItemId(item.id);
+    showToast(`${item.product.name}: +1 unidade na contagem`);
+  }
+
+  async function handleBarcodeScan(barcode: string) {
+    try {
+      const product = await productsApi.getByBarcode(barcode);
+      addScannedUnit(product.id);
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        setPendingBarcode(barcode);
+        return;
+      }
+      throw new Error(extractErrorMessage(error, "Produto não encontrado para este código"));
+    }
+  }
+
+  async function associateBarcode(productId: string) {
+    if (!pendingBarcode) return;
+    await productsApi.addBarcode(productId, pendingBarcode);
+    addScannedUnit(productId);
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
@@ -109,8 +147,16 @@ export function InventoryDetailPage() {
           </p>
         </div>
 
-        {isAdmin && canCount && (
-          <div className="text-right">
+        {canCount && (
+          <div className="flex items-center gap-3 text-right">
+            <button
+              onClick={() => setIsScannerOpen(true)}
+              className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-medium text-indigo-700 hover:bg-indigo-100"
+            >
+              Escanear produto
+            </button>
+            {isAdmin && (
+            <div>
             <button
               onClick={() => setIsConfirmingClose(true)}
               disabled={!allCounted || closeMutation.isPending}
@@ -120,6 +166,8 @@ export function InventoryDetailPage() {
               {closeMutation.isPending ? "Fechando..." : "Fechar inventário"}
             </button>
             {closeError && <p className="text-xs text-red-600 mt-1">{closeError}</p>}
+            </div>
+            )}
           </div>
         )}
       </div>
@@ -166,6 +214,8 @@ export function InventoryDetailPage() {
                   item={item}
                   canCount={canCount}
                   blindMode={inventory.blindMode}
+                  scannedQty={scannedQtyByItem[item.id]}
+                  shouldFocus={focusedItemId === item.id}
                   onSubmit={async (countedQty, note) => {
                     await countMutation.mutateAsync({ itemId: item.id, countedQty, note });
                   }}
@@ -190,6 +240,22 @@ export function InventoryDetailPage() {
         </table>
         </div>
       </div>
+
+      {isScannerOpen && (
+        <BarcodeScannerModal
+          onClose={() => setIsScannerOpen(false)}
+          onScan={handleBarcodeScan}
+        />
+      )}
+
+      {pendingBarcode && (
+        <BarcodeAssociationModal
+          barcode={pendingBarcode}
+          products={currentInventory.items.filter((item) => item.countedQty === null).map((item) => item.product)}
+          onClose={() => setPendingBarcode(null)}
+          onAssociate={associateBarcode}
+        />
+      )}
     </div>
   );
 }

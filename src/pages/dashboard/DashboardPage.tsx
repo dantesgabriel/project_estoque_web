@@ -101,6 +101,8 @@ export function DashboardPage() {
         <StatCard label="Estoque baixo" value={data.lowStockCount} tone="warning" />
         <StatCard label="Produtos zerados" value={data.zeroStockCount} tone="danger" />
         <StatCard label="Divergências pendentes" value={data.pendingDivergences} tone="warning" />
+        <StatCard label="Lotes vencidos" value={data.expiredBatchesCount} tone="danger" />
+        <StatCard label="Vencem em 30 dias" value={data.expiringSoonBatchesCount} tone="warning" />
       </div>
 
       {/* Ação principal — "INICIAR INVENTÁRIO", pedida na seção 18 do projeto. */}
